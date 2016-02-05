@@ -4,7 +4,6 @@ Various methods of drawing scrolling plots.
 """
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
-#from PyQt4 import QtGui
 import numpy as np
 import serial
 
@@ -19,12 +18,38 @@ rate = 100 # Hz
 
 ## Toggle whether to write data
 writeData = False;
+
+## Filename
+filename = 'datafile.dat'
+
+######################################################################
+## Functions to run when the buttons are pressed
+
+# The start button
+def startButton():
+    global writeData, fil
+    writeData=True
+    # open file
+    #with open(filename, 'w') as fil
+    fil = open(filename, 'w')
+    print 'file ' + filename + ' is open for writing!'
+
+# the stop button
+def stopButton():
+    global writeData, fil
+    writeData=False
+    #close file
+    fil.close()
+    print 'file ' + filename + ' is closed!'
+
 ######################################################################
 ## Everything under here is the guts. You're allowed to mess with it,
 ## though!
 execfile('GUI.py')
-#win = pg.GraphicsWindow()
-#win.setWindowTitle('pyqtgraph scrolling data')
+
+#fil = file(filename,'w')
+#fil.close()
+fil = None
 
 # 1) Simplest approach -- update data in the array such that plot appears to scroll
 #    The array size is fixed.
@@ -82,7 +107,10 @@ def update():
         # current, voltage, etc. are performed on the data arrays. 
         # 
         # Write to file here, also!
-        
+        if not fil is None:
+            if not fil.closed: 
+                fil.write(', '.join(map(repr, data[ptr,:])) + '\n')
+
         # Set the graph data. Note that we write from right to left, so
         # the time array counts backwards!
         curve.setData(x=time[-ptr:],y=data[:ptr,0])

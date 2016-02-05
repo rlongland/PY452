@@ -8,8 +8,9 @@ win.setWindowTitle('PY452 Data Logger')
 ## Create some widgets to be placed inside
 btnStart = QtGui.QPushButton('Record!')
 btnStop = QtGui.QPushButton('Stop!')
-text = QtGui.QLineEdit('Datafile Name')
+text = QtGui.QLineEdit(filename)
 pw = pg.PlotWidget()
+
 
 ## Create a grid layout to manage the widgets size and position
 layout = QtGui.QGridLayout()
@@ -23,15 +24,16 @@ layout.addWidget(pw, 0, 1, 4, 1)  # plot goes on right side, spanning 3 rows
 
 ## Add events to the buttons
 def handleButtonStart():
-    global writeData
-    writeData=True
-    #print ('Hello World')
+    startButton()
 def handleButtonStop():
-    global writeData
-    writeData=False
-    #print ('Goodbye World')
+    stopButton()
+def changeFilename(text):
+    global filename
+    filename = str(text)
+
 btnStart.clicked.connect(handleButtonStart)
 btnStop.clicked.connect(handleButtonStop)
+text.textChanged.connect(changeFilename)
 
 ## Display the widget as a new window
 win.show()
