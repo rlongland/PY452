@@ -4,6 +4,7 @@ Various methods of drawing scrolling plots.
 """
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
+#from PyQt4 import QtGui
 import numpy as np
 import serial
 
@@ -16,11 +17,14 @@ datalength = 1000
 ## The plot rate
 rate = 100 # Hz
 
+## Toggle whether to write data
+writeData = False;
 ######################################################################
 ## Everything under here is the guts. You're allowed to mess with it,
 ## though!
-win = pg.GraphicsWindow()
-win.setWindowTitle('pyqtgraph scrolling data')
+execfile('GUI.py')
+#win = pg.GraphicsWindow()
+#win.setWindowTitle('pyqtgraph scrolling data')
 
 # 1) Simplest approach -- update data in the array such that plot appears to scroll
 #    The array size is fixed.
@@ -31,20 +35,20 @@ data = np.zeros([datalength+1, 5])
 time = -1.0/rate*np.arange(datalength+1,0,-1)
 
 
-p = win.addPlot()
+#p = pw.addPlot()
 # Set up the plot
 # Use automatic downsampling and clipping to reduce the drawing load
-p.setDownsampling(mode='peak')
-p.setClipToView(True)
-p.setRange(xRange=[time[0], 0])  # Time is all in the past (time[0] is -10 seconds, for eg)
-p.setLimits(xMax=0) # can't look into the future!
-p.setLabel('left', "Y Axis")
-p.setLabel('bottom', "Time", units="s")
+pw.setDownsampling(mode='peak')
+pw.setClipToView(True)
+pw.setRange(xRange=[time[0], 0])  # Time is all in the past (time[0] is -10 seconds, for eg)
+pw.setLimits(xMax=0) # can't look into the future!
+pw.setLabel('left', "Y Axis")
+pw.setLabel('bottom', "Time", units="s")
 
 ## The lines in the plot. Preplot the zeros here and then update as
 ## the data arrives
-curve = p.plot(x=time,y=data[:,1])
-curve2 = p.plot(x=time,y=data[:,2],pen=(255,0,0))
+curve = pw.plot(x=time,y=data[:,1])
+curve2 = pw.plot(x=time,y=data[:,2],pen=(255,0,0))
 
 ## Open the serial port
 if useSerial:
