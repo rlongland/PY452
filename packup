@@ -1,0 +1,7 @@
+#!/bin/bash
+#
+
+mkdir 452DAQ
+cp -r 452DAQ.py GUI.py ArduinoDAQ 452DAQ/
+tar -czvf 452DAQ.tar.gz 452DAQ
+rm -rf 452DAQ
