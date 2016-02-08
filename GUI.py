@@ -11,6 +11,17 @@ btnStop = QtGui.QPushButton('Stop!')
 text = QtGui.QLineEdit(filename)
 pw = pg.PlotWidget()
 
+## initial text to display in the console
+namespace = {'pg': pg, 'np': np}
+ctext = """
+This is an interactive python console. The numpy and pyqtgraph modules have already been imported 
+as 'np' and 'pg'. 
+
+Go, play.
+"""
+c = pyqtgraph.console.ConsoleWidget(namespace=namespace, text=ctext)
+#c.show()
+#c.setWindowTitle('pyqtgraph example: ConsoleWidget')
 
 ## Create a grid layout to manage the widgets size and position
 layout = QtGui.QGridLayout()
@@ -20,7 +31,8 @@ win.setLayout(layout)
 layout.addWidget(text, 0, 0)   # text edit goes in top-left
 layout.addWidget(btnStart, 1, 0)   # button goes in middle-left
 layout.addWidget(btnStop, 2, 0)   # button goes in bottom-left
-layout.addWidget(pw, 0, 1, 4, 1)  # plot goes on right side, spanning 3 rows
+layout.addWidget(pw, 0, 1, 4, 1)  # plot goes on right side, spanning 4 rows
+layout.addWidget(c, 5, 0, 1, 0)
 
 ## Add events to the buttons
 def handleButtonStart():

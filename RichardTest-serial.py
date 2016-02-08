@@ -4,6 +4,7 @@ Various methods of drawing scrolling plots.
 """
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
+import pyqtgraph.console
 import numpy as np
 import serial
 
