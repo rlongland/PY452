@@ -8,7 +8,6 @@ const int analogOutPin = 9;
 
 int outputValue = 0;
 int sensorValue = 0;
-float firstTime = 0.;
 
 void setup() {
 
@@ -27,18 +26,12 @@ void setup() {
 
 void loop() {
 
-  if(Serial.available()) {
-
-    float timenow = micros();
-    if(firstTime == 0.)firstTime=timenow;
-    float timeDiff = timenow-firstTime;
+//  if(Serial.available()) {
 
     int signal = Serial.read();
     outputValue = map(signal, 0, 5, 0, 255);
     delay(2);  // wait 2 milliseconds
 
-    Serial.print(timeDiff);
-    Serial.print(" ");
     sensorValue = analogRead(A0);
     Serial.print(sensorValue); delayMicroseconds(d);
     Serial.print(" ");
@@ -58,5 +51,5 @@ void loop() {
     Serial.print(sensorValue); delayMicroseconds(d);
     Serial.print("\n");
 
-  }// end if
+//  }// end if
 }// end loop

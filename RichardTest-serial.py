@@ -7,15 +7,16 @@ from pyqtgraph.Qt import QtCore, QtGui
 import pyqtgraph.console
 import numpy as np
 import serial
+import time
 
 ## Use serial port?
-useSerial = False
+useSerial = True
 
 ## Some user variables
-datalength = 1000
+datalength = 100
 
 ## The plot rate
-rate = 100 # Hz
+rate = 10 # Hz
 
 ## Toggle whether to write data
 writeData = False;
@@ -56,9 +57,9 @@ fil = None
 #    The array size is fixed.
 
 # Zero the data array
-data = np.zeros([datalength+1, 5])
+data = np.zeros([datalength+1, 7])
 # The time array (in s)
-time = -1.0/rate*np.arange(datalength+1,0,-1)
+times = -1.0/rate*np.arange(datalength+1,0,-1)
 
 
 #p = pw.addPlot()
@@ -66,20 +67,20 @@ time = -1.0/rate*np.arange(datalength+1,0,-1)
 # Use automatic downsampling and clipping to reduce the drawing load
 pw.setDownsampling(mode='peak')
 pw.setClipToView(True)
-pw.setRange(xRange=[time[0], 0])  # Time is all in the past (time[0] is -10 seconds, for eg)
+pw.setRange(xRange=[times[0], 0])  # Time is all in the past (times[0] is -10 seconds, for eg)
 pw.setLimits(xMax=0) # can't look into the future!
 pw.setLabel('left', "Y Axis")
 pw.setLabel('bottom', "Time", units="s")
 
 ## The lines in the plot. Preplot the zeros here and then update as
 ## the data arrives
-curve = pw.plot(x=time,y=data[:,1])
-curve2 = pw.plot(x=time,y=data[:,2],pen=(255,0,0))
+curve = pw.plot(x=times,y=data[:,1])
+curve2 = pw.plot(x=times,y=data[:,2],pen=(255,0,0))
 
 ## Open the serial port
 if useSerial:
-    raw=serial.Serial("/dev/ttyACM0",9600)
-    raw.open()
+    raw=serial.Serial("/dev/ttyACM0",9600,timeout=1)
+    raw.isOpen()
 
 ptr = 0
 ## The update function. This function gets called every time the Qt timer sends a signal
@@ -95,12 +96,18 @@ def update():
 
     ## Read the serial data
     if useSerial:
+        raw.write('1')  ## Write to the serial to let it know we're
+                        ## ready to read something
+            
         line = raw.readline()
-        data[ptr,:] = [float(val) for val in line.split()]
-        #data[ptr,0] = float(line)
+        tdata = []
+        tdata = [float(val) for val in line.split()]
+        if len(tdata) == 7:
+            data[ptr,:len(tdata)] = tdata ##[float(val) for val in line.split()]
+            #data[ptr,0] = float(line)
     else:
         # or just generate some random numbers
-        data[ptr,0:2] = [np.random.normal(), np.random.normal()]
+        data[ptr,1:3] = [np.random.normal(), np.random.normal()]
         
         #----------------------------------------------------------------------
         # PY452
@@ -108,14 +115,14 @@ def update():
         # current, voltage, etc. are performed on the data arrays. 
         # 
         # Write to file here, also!
-        if not fil is None:
-            if not fil.closed: 
-                fil.write(', '.join(map(repr, data[ptr,:])) + '\n')
+    if not fil is None:
+        if not fil.closed: 
+            fil.write(', '.join(map(repr, data[ptr,:])) + '\n')
 
-        # Set the graph data. Note that we write from right to left, so
-        # the time array counts backwards!
-        curve.setData(x=time[-ptr:],y=data[:ptr,0])
-        curve2.setData(x=time[-ptr:],y=data[:ptr,1])
+    # Set the graph data. Note that we write from right to left, so
+    # the time array counts backwards!
+    curve.setData(x=times[-ptr:],y=data[:ptr,1])
+    curve2.setData(x=times[-ptr:],y=data[:ptr,2])
             
 
 ## Update the plots using Qt
