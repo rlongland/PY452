@@ -37,8 +37,10 @@ layout.addWidget(c, 5, 0, 1, 0)
 ## Add events to the buttons
 def handleButtonStart():
     startButton()
+    btnStart.setStyleSheet("background-color: green")
 def handleButtonStop():
     stopButton()
+    btnStart.setStyleSheet("background-color: none")
 def changeFilename(text):
     global filename
     filename = str(text)
