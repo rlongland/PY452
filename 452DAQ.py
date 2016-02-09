@@ -65,17 +65,23 @@ times = -1.0/rate*np.arange(datalength+1,0,-1)
 #p = pw.addPlot()
 # Set up the plot
 # Use automatic downsampling and clipping to reduce the drawing load
-pw.setDownsampling(mode='peak')
-pw.setClipToView(True)
-pw.setRange(xRange=[times[0], 0])  # Time is all in the past (times[0] is -10 seconds, for eg)
-pw.setLimits(xMax=0) # can't look into the future!
-pw.setLabel('left', "Y Axis")
-pw.setLabel('bottom', "Time", units="s")
+pw1.setDownsampling(mode='peak')
+pw1.setClipToView(True)
+pw1.setRange(xRange=[times[0], 0])  # Time is all in the past (times[0] is -10 seconds, for eg)
+pw1.setLimits(xMax=0) # can't look into the future!
+pw1.setLabel('left', "Y Axis")
+pw1.setLabel('bottom', "Time", units="s")
+pw2.setDownsampling(mode='peak')
+pw2.setClipToView(True)
+pw2.setRange(xRange=[times[0], 0])  # Time is all in the past (times[0] is -10 seconds, for eg)
+pw2.setLimits(xMax=0) # can't look into the future!
+pw2.setLabel('left', "Y Axis")
+pw2.setLabel('bottom', "Time", units="s")
 
 ## The lines in the plot. Preplot the zeros here and then update as
 ## the data arrives
-curve = pw.plot(x=times,y=data[:,1])
-curve2 = pw.plot(x=times,y=data[:,2],pen=(255,0,0))
+curve = pw1.plot(x=times,y=data[:,1])
+curve2 = pw2.plot(x=times,y=data[:,2],pen=(255,0,0))
 
 ## Open the serial port
 if useSerial:
