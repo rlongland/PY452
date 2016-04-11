@@ -13,13 +13,18 @@ import time
 datalength = 100
 
 ## The plot rate
-rate = 10 # Hz
+rate = 100 # Hz
 
 ## Toggle whether to write data
 writeData = False;
 
 ## Filename
 filename = 'datafile.dat'
+
+ARDUINO_SERIAL_PORT = '/dev/ttyACM0'
+SERIAL_PORT_BAUD = 115200
+PERIOD_ms = 100
+PORT_TIMEOUT = 2     # seconds
 
 ######################################################################
 ## Functions to run when the buttons are pressed
@@ -82,8 +87,20 @@ curve = pw1.plot(x=times,y=data[:,1])
 curve2 = pw2.plot(x=times,y=data[:,2],pen=(255,0,0))
 
 ## Open the serial port
-raw=serial.Serial("/dev/ttyACM0",9600,timeout=1)
-raw.isOpen()
+cr = Cmd_Response(ARDUINO_SERIAL_PORT, SERIAL_PORT_BAUD)
+time.sleep(2.5)
+print cr.receive()
+## Setup the average time and turn on averaging for analog 0 and 1
+cr.request('!t %d' % PERIOD_ms)
+cr.request('!ai:watch 0 1')
+cr.request('!ai:watch 1 1')
+
+##raw=serial.Serial("/dev/ttyACM0",9600,timeout=1)
+##raw.isOpen()
+
+
+print 'Measurement rate = ' + cr.request('?rate')
+print 'Averaging period = ' + cr.request('?t') + ' ms'
 
 ptr = 0
 ## The update function. This function gets called every time the Qt timer sends a signal
@@ -98,18 +115,22 @@ def update():
         data=np.roll(data,-1,axis=0)
 
     ## Read the serial data
-    raw.write('1')  ## Write to the serial to let it know we're
+    ##raw.write('1')  ## Write to the serial to let it know we're
                     ## ready to read something
+    ch0 = float(cr.request('?ai:mean 0'))
+    ch1 = float(cr.request('?ai:mean 1'))
+    #print ch0, ch1
             
-    line = raw.readline()
-    tdata = []
-    tdata = [float(val) for val in line.split()]
-    if len(tdata) == 7:
-        data[ptr,:len(tdata)] = tdata ##[float(val) for val in line.split()]
+    ##    line = raw.readline()
+    ##    line = ch0
+    ##    tdata = []
+    ##    tdata = [float(val) for val in line.split()]
+    ##    if len(tdata) == 7:
+    data[ptr,1:3] = [ch0,ch1] ##[float(val) for val in line.split()]
         #data[ptr,0] = float(line)
-    else:
+        ##    else:
         # or just generate some random numbers
-        data[ptr,1:3] = [np.random.normal(), np.random.normal()]
+        ##data[ptr,1:3] = [np.random.normal(), np.random.normal()]
         
     #----------------------------------------------------------------------
     # PY452
@@ -123,6 +144,7 @@ def update():
 
     # Set the graph data. Note that we write from right to left, so
     # the time array counts backwards!
+    #print data[:ptr,1]
     curve.setData(x=times[-ptr:],y=data[:ptr,1])
     curve2.setData(x=times[-ptr:],y=data[:ptr,2])
             
