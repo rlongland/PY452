@@ -9,9 +9,6 @@ import numpy as np
 import serial
 import time
 
-## Use serial port?
-useSerial = True
-
 ## Some user variables
 datalength = 100
 
@@ -48,6 +45,7 @@ def stopButton():
 ## Everything under here is the guts. You're allowed to mess with it,
 ## though!
 execfile('GUI.py')
+execfile('cmd.py')
 
 #fil = file(filename,'w')
 #fil.close()
@@ -84,9 +82,8 @@ curve = pw1.plot(x=times,y=data[:,1])
 curve2 = pw2.plot(x=times,y=data[:,2],pen=(255,0,0))
 
 ## Open the serial port
-if useSerial:
-    raw=serial.Serial("/dev/ttyACM0",9600,timeout=1)
-    raw.isOpen()
+raw=serial.Serial("/dev/ttyACM0",9600,timeout=1)
+raw.isOpen()
 
 ptr = 0
 ## The update function. This function gets called every time the Qt timer sends a signal
@@ -101,26 +98,25 @@ def update():
         data=np.roll(data,-1,axis=0)
 
     ## Read the serial data
-    if useSerial:
-        raw.write('1')  ## Write to the serial to let it know we're
-                        ## ready to read something
+    raw.write('1')  ## Write to the serial to let it know we're
+                    ## ready to read something
             
-        line = raw.readline()
-        tdata = []
-        tdata = [float(val) for val in line.split()]
-        if len(tdata) == 7:
-            data[ptr,:len(tdata)] = tdata ##[float(val) for val in line.split()]
-            #data[ptr,0] = float(line)
+    line = raw.readline()
+    tdata = []
+    tdata = [float(val) for val in line.split()]
+    if len(tdata) == 7:
+        data[ptr,:len(tdata)] = tdata ##[float(val) for val in line.split()]
+        #data[ptr,0] = float(line)
     else:
         # or just generate some random numbers
         data[ptr,1:3] = [np.random.normal(), np.random.normal()]
         
-        #----------------------------------------------------------------------
-        # PY452
-        # HERE is where you can edit the read data. Conversions to
-        # current, voltage, etc. are performed on the data arrays. 
-        # 
-        # Write to file here, also!
+    #----------------------------------------------------------------------
+    # PY452
+    # HERE is where you can edit the read data. Conversions to
+    # current, voltage, etc. are performed on the data arrays. 
+    # 
+    # Write to file here, also!
     if not fil is None:
         if not fil.closed: 
             fil.write(', '.join(map(repr, data[ptr,:])) + '\n')
