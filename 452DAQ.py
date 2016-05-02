@@ -13,7 +13,7 @@ import time
 datalength = 100
 
 ## The plot rate
-rate = 100 # Hz
+rate = 1 # Hz
 
 ## Toggle whether to write data
 writeData = False;
