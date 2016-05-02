@@ -40,6 +40,7 @@ long ai_sums[NUM_ANALOG_INPUTS];
 float ai_mean[NUM_ANALOG_INPUTS];
 long count, rate;
 long nextUpdate;
+long time, t0;
 
 void setup() {
   resetBuffer();
@@ -54,6 +55,8 @@ void setup() {
   count = 0;
   rate = 0;
   nextUpdate = millis() + period;
+  // Setup the initial time
+  resetTime();
 }
 
 void loop() {
@@ -130,6 +133,7 @@ void resetBuffer() {
   arg2 = UNDEFINED;
 }
 
+
 //  USB command interface of form: baseCmd [arg1 [arg2]]
 //
 // char* baseCmd (lower case)
@@ -158,6 +162,8 @@ void executeCommand() {
     else if (0 == strcmp(baseCmd, "?v"))        get_software_version(inputString);
     else if (0 == strcmp(baseCmd, "?id"))       get_software_id(inputString);
     else if (0 == strcmp(baseCmd, "?rate"))     get_loop_rate(inputString);
+    else if (0 == strcmp(baseCmd, "?time"))     get_time(inputString);
+    else if (0 == strcmp(baseCmd, "!resetTime")) resetTime(inputString);
     else {
       Serial.print(F("ERROR_UNKNOWN_COMMAND:"));
       finalizeError(inputString);
@@ -351,4 +357,11 @@ void setPinMode(char* in) {
     pinMode(arg1, (arg2 == 1) ? OUTPUT : INPUT);
     Serial.println(F("Ok"));
   }
+}
+
+void resetTime(char* in) {
+  t0 = micros();
+}
+void get_time(char* in) {
+  Serial.println(micros()-t0);
 }

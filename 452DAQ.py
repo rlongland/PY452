@@ -9,22 +9,18 @@ import numpy as np
 import serial
 import time
 
-## Some user variables
-datalength = 100
 
-## The plot rate
-rate = 1 # Hz
+######################################################################
+## Everything under here is the guts. You're allowed to mess with it,
+## though!
+execfile('UserCommands.py')  ## User-defined commands
+execfile('GUI.py')           ## GUI functions
+execfile('cmd.py')           ## The command-response functions
 
-## Toggle whether to write data
-writeData = False;
+#fil = file(filename,'w')
+#fil.close()
+fil = None
 
-## Filename
-filename = 'datafile.dat'
-
-ARDUINO_SERIAL_PORT = '/dev/ttyACM0'
-SERIAL_PORT_BAUD = 115200
-PERIOD_ms = 100
-PORT_TIMEOUT = 2     # seconds
 
 ######################################################################
 ## Functions to run when the buttons are pressed
@@ -34,9 +30,10 @@ def startButton():
     global writeData, fil
     writeData=True
     # open file
-    #with open(filename, 'w') as fil
     fil = open(filename, 'w')
     print 'file ' + filename + ' is open for writing!'
+    ## Any additional user commands to run when "record" is pressed
+    UserStartButton()
 
 # the stop button
 def stopButton():
@@ -45,17 +42,9 @@ def stopButton():
     #close file
     fil.close()
     print 'file ' + filename + ' is closed!'
+    ## Any additional user commands to run when "stop" is pressed
+    UserStopButton()
 
-######################################################################
-## Everything under here is the guts. You're allowed to mess with it,
-## though!
-execfile('GUI.py')           ## GUI functions
-execfile('cmd.py')           ## The command-response functions
-execfile('UserCommands.py')  ## User-defined commands
-
-#fil = file(filename,'w')
-#fil.close()
-fil = None
 
 # 1) Simplest approach -- update data in the array such that plot appears to scroll
 #    The array size is fixed.
@@ -66,8 +55,7 @@ data = np.zeros([datalength+1, 7])
 times = -1.0/rate*np.arange(datalength+1,0,-1)
 
 
-#p = pw.addPlot()
-# Set up the plot
+# Set up the plots
 # Use automatic downsampling and clipping to reduce the drawing load
 pw1.setDownsampling(mode='peak')
 pw1.setClipToView(True)
@@ -91,17 +79,9 @@ curve2 = pw2.plot(x=times,y=data[:,2],pen=(255,0,0))
 cr = Cmd_Response(ARDUINO_SERIAL_PORT, SERIAL_PORT_BAUD)
 time.sleep(2.5)
 print cr.receive()
-## Setup the average time and turn on averaging for analog 0 and 1
-cr.request('!t %d' % PERIOD_ms)
-cr.request('!ai:watch 0 1')
-cr.request('!ai:watch 1 1')
 
-##raw=serial.Serial("/dev/ttyACM0",9600,timeout=1)
-##raw.isOpen()
-
-
-print 'Measurement rate = ' + cr.request('?rate')
-print 'Averaging period = ' + cr.request('?t') + ' ms'
+## Call the user setup routine
+UserSetup()
 
 ptr = 0
 ## The update function. This function gets called every time the Qt timer sends a signal
@@ -115,23 +95,12 @@ def update():
         # once filled, slide the data left and write to the end
         data=np.roll(data,-1,axis=0)
 
-    ## Read the serial data
-    ##raw.write('1')  ## Write to the serial to let it know we're
-                    ## ready to read something
-    ch0 = float(cr.request('?ai:mean 0'))
-    ch1 = float(cr.request('?ai:mean 1'))
-    #print ch0, ch1
+    ## Read data from the arduino using the user-defined read function
+    UserReadOnLoop()
+#    ch0 = float(cr.request('?ai:mean 0'))
+#    ch1 = float(cr.request('?ai:mean 1'))
             
-    ##    line = raw.readline()
-    ##    line = ch0
-    ##    tdata = []
-    ##    tdata = [float(val) for val in line.split()]
-    ##    if len(tdata) == 7:
-    data[ptr,1:3] = [ch0,ch1] ##[float(val) for val in line.split()]
-        #data[ptr,0] = float(line)
-        ##    else:
-        # or just generate some random numbers
-        ##data[ptr,1:3] = [np.random.normal(), np.random.normal()]
+#    data[ptr,1:3] = [ch0,ch1] 
         
     #----------------------------------------------------------------------
     # PY452
