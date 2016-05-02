@@ -49,8 +49,9 @@ def stopButton():
 ######################################################################
 ## Everything under here is the guts. You're allowed to mess with it,
 ## though!
-execfile('GUI.py')
-execfile('cmd.py')
+execfile('GUI.py')           ## GUI functions
+execfile('cmd.py')           ## The command-response functions
+execfile('UserCommands.py')  ## User-defined commands
 
 #fil = file(filename,'w')
 #fil.close()
