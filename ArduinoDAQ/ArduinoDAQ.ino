@@ -27,7 +27,7 @@
 #define MULTIPLIER_MAX      1000000
 
 char inputString[BUFFER_LENGTH+1];
-char strPtr;
+int strPtr;
 boolean stringComplete;
 long arg1;
 long arg2;
@@ -39,7 +39,7 @@ int ai_watched[NUM_ANALOG_INPUTS];
 long ai_sums[NUM_ANALOG_INPUTS];
 float ai_mean[NUM_ANALOG_INPUTS];
 long count, rate;
-long nextUpdate;
+unsigned long nextUpdate;
 long time, t0;
 
 void setup() {
@@ -56,6 +56,8 @@ void setup() {
   nextUpdate = millis() + period;
   // Setup the initial time
   resetTime();
+  // Setup the DAC resolution
+  analogWriteResolution(12);
 }
 
 void loop() {
@@ -130,6 +132,7 @@ void executeCommand() {
   dissectCommand(inputString);
   if (strlen(baseCmd)) {
     if      (0 == strcmp(baseCmd, "?ai"))       readAI(inputString);
+    else if (0 == strcmp(baseCmd, "!ao"))       writeAO(inputString);
     else if (0 == strcmp(baseCmd, "?bi"))       readBI(inputString);
     else if (0 == strcmp(baseCmd, "!bo"))       writeBO(inputString);
     else if (0 == strcmp(baseCmd, "!pwm"))      writePWM(inputString);
@@ -201,6 +204,20 @@ void readAI(char* in) {
     finalizeError(in);
   } else {
     Serial.println(analogRead(arg1));
+  }
+}
+
+void writeAO(char* in) {
+  if (arg1 < 0 || arg1 > 3300) {
+    Serial.print(F("ERROR_ANALOG_RANGE:"));
+    finalizeError(in);
+  } else {
+    // Then map from mV to output range
+    int outputValue = map(arg1, 0, 3300, 0, 4096);
+
+    // WRITE THIS VALUE TO dac PIN 14 HERE  
+    analogWrite(A14, outputValue);
+    Serial.println(F("Ok"));
   }
 }
 
@@ -350,5 +367,5 @@ void resetTime() {
   t0 = micros();
 }
 void get_time(char* in) {
-  Serial.println(micros()-t0);
+  Serial.println(long(micros()-t0));
 }

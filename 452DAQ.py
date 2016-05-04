@@ -8,7 +8,10 @@ import pyqtgraph.console
 import numpy as np
 import serial
 import time
+import math
 
+## Global parameters
+t0 = 0
 
 ######################################################################
 ## Everything under here is the guts. You're allowed to mess with it,
@@ -94,6 +97,9 @@ def update():
     else:
         # once filled, slide the data left and write to the end
         data=np.roll(data,-1,axis=0)
+
+    ## Write output voltage to Teensy
+    UserWriteOnLoop()
 
     ## Read data from the arduino using the user-defined read function
     UserReadOnLoop()
