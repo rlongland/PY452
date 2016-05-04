@@ -57,6 +57,12 @@ def UserReadOnLoop():
     data[ptr,0:3] = [time,ch0,ch1]
 
 ##----------------------------------------------------------------------
+def UserWriteOnLoop():
+    global outputV
+
+    incrementV = 0.1  # V
+    outputV = outputV+incrementV
+
 
 ##----------------------------------------------------------------------
 def UserStartButton():
