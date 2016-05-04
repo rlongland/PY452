@@ -13,6 +13,7 @@ import math
 
 ## Global parameters
 t0 = 0
+paused = False
 
 ######################################################################
 ## Everything under here is the guts. You're allowed to mess with it,
@@ -48,6 +49,22 @@ def stopButton():
     print 'file ' + filename + ' is closed!'
     ## Any additional user commands to run when "stop" is pressed
     UserStopButton()
+
+# The pause button
+tp=0
+tr=0
+def pauseButton():
+    global paused, t0, tp, tr
+
+    if paused:
+        paused=False
+        timer.blockSignals(False)
+        tr = float(cr.request('?time'))/1e6
+        t0 = t0+(tr-tp)
+    else:
+        paused=True
+        timer.blockSignals(True)
+        tp=float(cr.request('?time'))/1e6
 
 
 # 1) Simplest approach -- update data in the array such that plot appears to scroll

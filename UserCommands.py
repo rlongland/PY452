@@ -64,8 +64,8 @@ def UserReadOnLoop():
     time = float(cr.request('?time'))/1e6
 
     ## Grab mean readings from channel 0  and channel 1
-    ch0 = float(cr.request('?ai:mean 0'))/1000
-    ch1 = float(cr.request('?ai:mean 1'))/1000
+    ch0 = float(cr.request('?ai:mean 0'))/1000 - 1
+    ch1 = float(cr.request('?ai:mean 1'))/1000 - 1
 
     ## Load up the data matrix. ptr is used internally by 452DAQ to
     ## keep track of the current position in the matrix

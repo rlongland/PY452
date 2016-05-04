@@ -8,6 +8,7 @@ win.setWindowTitle('PY452 Data Logger')
 ## Create some widgets to be placed inside
 btnStart = QtGui.QPushButton('Record!')
 btnStop = QtGui.QPushButton('Stop!')
+btnPause = QtGui.QPushButton('Pause!')
 text = QtGui.QLineEdit(filename)
 pw1 = pg.PlotWidget()
 pw2 = pg.PlotWidget()
@@ -39,6 +40,7 @@ layout.addWidget(pw2, 0, 1, 1, 1)  # plot goes on right side, spanning 4 rows
 layout.addWidget(text, 1, 0)   # text edit goes in top-left
 layout.addWidget(btnStart, 2, 0)   # button goes in middle-left
 layout.addWidget(btnStop, 3, 0)   # button goes in bottom-left
+layout.addWidget(btnPause, 4, 0)  
 layout.addWidget(c, 1, 1, 4, 1)
 
 ## Add events to the buttons
@@ -51,9 +53,17 @@ def handleButtonStop():
 def changeFilename(text):
     global filename
     filename = str(text)
+def handleButtonPause():
+    pauseButton()
+    if paused:
+        btnPause.setStyleSheet("background-color: red")
+    else:
+        btnPause.setStyleSheet("background-color: none")
+
 
 btnStart.clicked.connect(handleButtonStart)
 btnStop.clicked.connect(handleButtonStop)
+btnPause.clicked.connect(handleButtonPause)
 text.textChanged.connect(changeFilename)
 
 ## Display the widget as a new window
