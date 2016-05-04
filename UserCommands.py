@@ -10,7 +10,7 @@
 datalength = 100
 
 ## The plot rate
-rate = 1 # Hz
+rate = 10 # Hz
 
 ## Toggle whether to write data
 writeData = False;
@@ -55,6 +55,8 @@ def UserReadOnLoop():
     ## Load up the data matrix. ptr is used internally by 452DAQ to
     ## keep track of the current position in the matrix
     data[ptr,0:3] = [time,ch0,ch1]
+
+##----------------------------------------------------------------------
 
 ##----------------------------------------------------------------------
 def UserStartButton():

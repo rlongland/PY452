@@ -3,7 +3,7 @@
  * simple command/response access via USB to Arduino's I/O capabilities
  */
 
-#define SOFTWARE_VERSION       "2014-01-15"
+#define SOFTWARE_VERSION       "2016-05-04"
 #define SOFTWARE_ID            "cmd_response"
 
 #define BUFFER_LENGTH          40
@@ -46,7 +46,6 @@ void setup() {
   resetBuffer();
   Serial.begin(115200);
   Serial.print(F("cmd_response started: "));
-  Serial.println(freeRam());
   for (int i = 0; i < NUM_ANALOG_INPUTS; i++) {
     ai_watched[i] = 0;    // by default, do not monitor
     ai_sums[i] = 0;
@@ -86,18 +85,6 @@ void signalGathering() {
       ai_sums[i] += analogRead(i);
   }
   count++;
-}
-
-/**
-  * Finds the amount of free memory by calculating the difference
-  * between the address of a new stack variable and the address of 
-  * the end of the heap.
-  */
-int freeRam()
-{   
-    extern int __heap_start, *__brkval;
-    int v;
-    return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
 
 void readBuffer() {
@@ -163,7 +150,7 @@ void executeCommand() {
     else if (0 == strcmp(baseCmd, "?id"))       get_software_id(inputString);
     else if (0 == strcmp(baseCmd, "?rate"))     get_loop_rate(inputString);
     else if (0 == strcmp(baseCmd, "?time"))     get_time(inputString);
-    else if (0 == strcmp(baseCmd, "!resetTime")) resetTime(inputString);
+    else if (0 == strcmp(baseCmd, "!resetTime")) resetTime();
     else {
       Serial.print(F("ERROR_UNKNOWN_COMMAND:"));
       finalizeError(inputString);
@@ -359,7 +346,7 @@ void setPinMode(char* in) {
   }
 }
 
-void resetTime(char* in) {
+void resetTime() {
   t0 = micros();
 }
 void get_time(char* in) {
