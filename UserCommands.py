@@ -20,6 +20,7 @@ incrementV = 100   # in mV
 ## For sine wave output
 amplitude = 1000   # maximum voltage in mV
 period = 10        # in s
+offset = amplitude+500 # in mV
 
 
 ## Toggle whether to write data
@@ -89,7 +90,7 @@ def UserWriteOnLoop():
         time = float(cr.request('?time'))/1e6 - t0
         ## The output voltage is offset to positive-only. 
         phase = -math.pi/2
-        outputV = amplitude*math.sin(phase + time*2*math.pi/period) + amplitude
+        outputV = amplitude*math.sin(phase + time*2*math.pi/period) + offset
 
     ## We write to the arduino DAC in milivolts
     cr.request('!ao ' + str(outputV))
