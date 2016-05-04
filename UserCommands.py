@@ -61,7 +61,7 @@ def UserReadOnLoop():
     global data, ptr
 
     ## Grab the time
-    time = float(cr.request('?time'))
+    time = float(cr.request('?time'))/1e6
 
     ## Grab mean readings from channel 0  and channel 1
     ch0 = float(cr.request('?ai:mean 0'))/1000

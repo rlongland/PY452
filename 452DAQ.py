@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Various methods of drawing scrolling plots.
@@ -55,23 +56,24 @@ def stopButton():
 # Zero the data array
 data = np.zeros([datalength+1, 7])
 # The time array (in s)
-times = -1.0/rate*np.arange(datalength+1,0,-1)
+times = 1.0/rate*np.arange(0,datalength+1,1)
 
 
 # Set up the plots
 # Use automatic downsampling and clipping to reduce the drawing load
 pw1.setDownsampling(mode='peak')
 pw1.setClipToView(True)
-pw1.setRange(xRange=[times[0], 0])  # Time is all in the past (times[0] is -10 seconds, for eg)
-pw1.setLimits(xMax=0) # can't look into the future!
+#pw1.setRange(xRange=[0,times[datalength]*1.5]) 
+pw1.setRange(xRange=[0,datalength]) 
+pw1.setLimits(xMin=0,xMax=datalength) # can't look into the past!
 pw1.setLabel('left', "Y Axis")
-pw1.setLabel('bottom', "Time", units="s")
+pw1.setLabel('bottom', "Index")
 pw2.setDownsampling(mode='peak')
 pw2.setClipToView(True)
-pw2.setRange(xRange=[times[0], 0])  # Time is all in the past (times[0] is -10 seconds, for eg)
-pw2.setLimits(xMax=0) # can't look into the future!
+pw2.setRange(xRange=[0,datalength]) 
+pw2.setLimits(xMin=0,xMax=datalength) # can't look into the past!
 pw2.setLabel('left', "Y Axis")
-pw2.setLabel('bottom', "Time", units="s")
+pw2.setLabel('bottom', "Index")
 
 ## The lines in the plot. Preplot the zeros here and then update as
 ## the data arrives
@@ -97,16 +99,14 @@ def update():
     else:
         # once filled, slide the data left and write to the end
         data=np.roll(data,-1,axis=0)
+        #pw1.autoRange()
+        #pw2.autoRange()
 
     ## Write output voltage to Teensy
     UserWriteOnLoop()
 
     ## Read data from the arduino using the user-defined read function
     UserReadOnLoop()
-#    ch0 = float(cr.request('?ai:mean 0'))
-#    ch1 = float(cr.request('?ai:mean 1'))
-            
-#    data[ptr,1:3] = [ch0,ch1] 
         
     #----------------------------------------------------------------------
     # PY452
@@ -120,9 +120,11 @@ def update():
 
     # Set the graph data. Note that we write from right to left, so
     # the time array counts backwards!
-    #print data[:ptr,1]
-    curve.setData(x=times[-ptr:],y=data[:ptr,1])
-    curve2.setData(x=times[-ptr:],y=data[:ptr,2])
+    i = np.arange(0,ptr,1)
+    #curve.setData(x=data[:ptr,0],y=data[:ptr,1])
+    curve.setData(x=i,y=data[:ptr,1])
+    #    curve2.setData(x=data[:ptr,0],y=data[:ptr,2])
+    curve2.setData(x=i,y=data[:ptr,2])
             
 
 ## Update the plots using Qt
