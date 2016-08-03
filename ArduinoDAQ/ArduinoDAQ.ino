@@ -41,6 +41,11 @@ float ai_mean[NUM_ANALOG_INPUTS];
 long count, rate;
 unsigned long nextUpdate;
 long time, t0;
+boolean outputSecret=false;
+
+float phase = 0.0;
+float twopi = 3.14159 * 2;
+elapsedMicros usec = 0;
 
 void setup() {
   resetBuffer();
@@ -61,9 +66,15 @@ void setup() {
 }
 
 void loop() {
-  signalGathering();
   readBuffer();
   processCmd();
+
+  // only gather signals if we're not outputting
+  if(outputSecret)
+    secretSignal();
+  else
+    signalGathering();
+
 }
 
 void signalGathering() {
@@ -154,6 +165,7 @@ void executeCommand() {
     else if (0 == strcmp(baseCmd, "?rate"))     get_loop_rate(inputString);
     else if (0 == strcmp(baseCmd, "?time"))     get_time(inputString);
     else if (0 == strcmp(baseCmd, "!resetTime")) resetTime();
+    else if (0 == strcmp(baseCmd, "!secret"))   toggleSecretSignal();
     else {
       Serial.print(F("ERROR_UNKNOWN_COMMAND:"));
       finalizeError(inputString);
@@ -368,4 +380,40 @@ void resetTime() {
 }
 void get_time(char* in) {
   Serial.println(long(micros()-t0));
+}
+
+void toggleSecretSignal(){
+
+  if(outputSecret)
+    outputSecret=false;
+  else
+    outputSecret=true;
+
+}
+
+void secretSignal(){
+
+  float tnow = micros()-t0;
+
+  float freq1 = 10.;
+  float omega1 = twopi*freq1*1.0e-6;
+  float wave1 = sin(omega1*tnow) * 1000.0 + 1500.;
+
+  float freq2 = 100.;
+  float omega2 = twopi*freq2*1.0e-6;
+  float wave2 = sin(omega2*tnow) * 300.0;
+
+  float freq3 = 300.;
+  float omega3 = twopi*freq3*1.0e-6;
+  float wave3 = sin(omega3*tnow) * 200.0;  
+
+  float ran = random(-100,100);
+
+  float val = wave1+wave2+wave3+ran;
+  analogWrite(A14, (int)val);
+  //  phase = phase + 0.02;
+  //  if (phase >= twopi) phase = 0;
+  //  while (usec < 500) ; // wait
+  //  usec = usec - 500;
+
 }

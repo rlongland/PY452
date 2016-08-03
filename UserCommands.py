@@ -13,10 +13,10 @@ datalength = 100
 rate = 10 # Hz
 
 ## Output voltage control
-SignalType = "Sin"
+SignalType = "None"
 outputV = 0
 ## For linear voltage sweeps, triangle, etc
-incrementV = 100   # in mV
+incrementV = 500   # in mV
 ## For sine wave output
 amplitude = 1000   # maximum voltage in mV
 period = 10        # in s
@@ -62,7 +62,7 @@ def UserReadOnLoop():
     global data, ptr
 
     ## Grab the time
-    time = float(cr.request('?time'))/1e6
+    tnow = float(cr.request('?time'))/1e6
 
     ## Grab mean readings from channel 0  and channel 1
     ch0 = float(cr.request('?ai:mean 0'))/1000 - 1
@@ -70,7 +70,7 @@ def UserReadOnLoop():
 
     ## Load up the data matrix. ptr is used internally by 452DAQ to
     ## keep track of the current position in the matrix
-    data[ptr,0:3] = [time,ch0,ch1]
+    data[ptr,0:3] = [tnow,ch0,ch1]
 
 ##----------------------------------------------------------------------
 def UserWriteOnLoop():
@@ -87,13 +87,17 @@ def UserWriteOnLoop():
         if t0==0:
             t0 = float(cr.request('?time'))/1e6
         ## Grab the time
-        time = float(cr.request('?time'))/1e6 - t0
+        tnow = float(cr.request('?time'))/1e6 - t0
         ## The output voltage is offset to positive-only. 
         phase = -math.pi/2
-        outputV = amplitude*math.sin(phase + time*2*math.pi/period) + offset
+        outputV = amplitude*math.sin(phase + tnow*2*math.pi/period) + offset
+
+    if SignalType == "SingleMeasurement" :
+        UserSingleMeasurementLoop()
 
     ## We write to the arduino DAC in milivolts
     cr.request('!ao ' + str(outputV))
+    ##time.sleep(0.1)
 
 ##----------------------------------------------------------------------
 def UserStartButton():
@@ -104,3 +108,32 @@ def UserStopButton():
     ## Print something
     print 'The user stop functions are being run'
 
+##----------------------------------------------------------------------
+def UserSingleMeasurementInit():
+    global outputV, SignalType
+
+    SignalType = "SingleMeasurement"
+    
+    ## Start the output voltage at 0 mV
+    outputV=0
+    ## We write to the arduino DAC in milivolts
+    cr.request('!ao ' + str(outputV))
+
+    ## Sleep for a second to make sure everything is settled
+    time.sleep(1)
+    
+##----------------------------------------------------------------------
+def UserSingleMeasurementLoop():
+    global outputV, SignalType
+    
+    ## Step the voltage from 0 mV to 3000 mV in steps of 100 mV
+    step=100 # mV
+    end=3000
+
+    outputV = outputV+step
+    cr.request('!ao ' + str(outputV))
+    time.sleep(0.1)
+
+    if(outputV > end):
+        singlemeasurementStop()
+        SignalType = "None"

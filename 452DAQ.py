@@ -66,6 +66,48 @@ def pauseButton():
         timer.blockSignals(True)
         tp=float(cr.request('?time'))/1e6
 
+def secretButton():
+    global paused, t0, tp, tr
+
+    if paused:
+        paused=False
+        timer.blockSignals(False)
+        tr = float(cr.request('?time'))/1e6
+        t0 = t0+(tr-tp)
+        print "Finished secret signal!"
+        cr.request('!secret')
+    else:
+        paused=True
+        timer.blockSignals(True)
+        tp=float(cr.request('?time'))/1e6
+        print "Outputting a secret signal!"
+        ## call the secret signal on the arduino
+        cr.request('!secret')
+        
+        
+def singlemeausurementButton():
+    global writeData, fil
+
+    #timer.blockSignals(True)
+    writeData=True
+
+    # open the file
+    fil = open(filename, 'w')
+    print 'file ' + filename + ' is open for writing!'
+
+    ## Any additional user commands to run when "record" is pressed
+    UserSingleMeasurementInit()
+    #UserSingleMeasurementLoop()
+
+def singlemeasurementStop():
+    # Stop writing
+    writeData=False
+    #close file
+    fil.close()
+    print 'file ' + filename + ' is closed!'
+
+    #timer.blockSignals(False)
+
 
 # 1) Simplest approach -- update data in the array such that plot appears to scroll
 #    The array size is fixed.
@@ -106,7 +148,9 @@ print cr.receive()
 UserSetup()
 
 ptr = 0
-## The update function. This function gets called every time the Qt timer sends a signal
+## The update function. This function gets called every time the Qt
+## timer sends a signal or we can call it outselves to update the
+## plots
 def update():
     global data, curve, curve2, ptr
 
@@ -133,7 +177,8 @@ def update():
     # Write to file here, also!
     if not fil is None:
         if not fil.closed: 
-            fil.write(', '.join(map(repr, data[ptr,:])) + '\n')
+#            fil.write(',\t'.join(map(repr, data[ptr,:])) + '\n')
+            fil.write(',\t'.join('{1:.4}'.format(*k) for k in enumerate(data[ptr,:])) + '\n')
 
     # Set the graph data. Note that we write from right to left, so
     # the time array counts backwards!
