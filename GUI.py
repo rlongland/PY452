@@ -6,16 +6,25 @@ win = QtGui.QWidget()
 win.setWindowTitle('PY452 Data Logger')
 
 ## Create some widgets to be placed inside
-btnStart = QtGui.QPushButton('Record Continuous')
+btnStart = QtGui.QPushButton('Record')
+btnStart.setFixedSize(200, 30)
 btnSingleMeasurement = QtGui.QPushButton('Record Single Measurement')
 btnStop = QtGui.QPushButton('Stop')
-btnPause = QtGui.QPushButton('Pause!')
+btnStop.setFixedSize(200, 30)
+btnPause = QtGui.QPushButton('Pause')
+btnPause.setFixedSize(200, 30)
 text = QtGui.QLineEdit(filename)
 textSetV = QtGui.QLineEdit(str(outputV))
+#textSetV.setFixedSize(150, 30)
 btnSecret = QtGui.QPushButton('Secret Signal!')
+btnSecret.setFixedSize(200, 30)
 pw1 = pg.PlotWidget()
+pw1.setFixedSize(600, 500)
 pw2 = pg.PlotWidget()
+pw2.setFixedSize(600, 500)
 space = QtGui.QSpacerItem(1,1)
+label1 = QtGui.QLabel('Output in mV')
+label1.setFixedSize(150, 30)
 
 ## initial text to display in the console
 namespace = {'pg': pg, 'np': np}
@@ -33,23 +42,25 @@ c = pyqtgraph.console.ConsoleWidget(namespace=namespace, text=ctext)
 layout = QtGui.QGridLayout()
 win.setLayout(layout)
 
+layout.setRowStretch(4,1)
 layout.setRowStretch(3,1)
 layout.setRowStretch(2,1)
 layout.setRowStretch(1,1)
 layout.setRowStretch(0,1)
 
 ## Add widgets to the layout in their proper positions
-layout.addWidget(pw1, 0, 0, 1, 3)  # plot goes on right side, spanning 4 rows
+layout.addWidget(pw1, 0, 0, 1, 3)  # plot goes on left side, spanning 4 rows
 layout.addWidget(pw2, 0, 3, 1, 3)  # plot goes on right side, spanning 4 rows
 
 layout.addWidget(text, 1, 0, 1, 3)   # text edit goes in top-left
-layout.addWidget(btnStart, 2, 0, 1, 1)   # button goes in middle-left
-layout.addWidget(btnStop, 2, 1, 1, 1)   # button goes in bottom-left
-layout.addWidget(btnPause, 2, 2, 1, 1)  
+layout.addWidget(btnStart, 2, 0)   # button goes in middle-left
+layout.addWidget(btnStop, 2, 1)   # button goes in bottom-left
+layout.addWidget(btnPause, 2, 2)  
 layout.addWidget(btnSingleMeasurement, 3, 0, 1, 3)  
-layout.addWidget(textSetV, 4, 0, 1, 1) 
-layout.addWidget(btnSecret, 4, 1, 1, 1) 
-layout.addWidget(c, 1, 3, 4, 3)
+layout.addWidget(textSetV, 4, 0, 1, 1)
+layout.addWidget(label1, 4, 1, 1, 1)
+layout.addWidget(btnSecret, 4, 2, 1, 1) 
+layout.addWidget(c, 1, 3, 5, 3)
 
 ## Add events to the buttons
 def handleButtonStart():
