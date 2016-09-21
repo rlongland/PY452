@@ -63,6 +63,7 @@ void setup() {
   resetTime();
   // Setup the DAC resolution
   analogWriteResolution(12);
+  analogReadResolution(12);
 }
 
 void loop() {
